@@ -1,0 +1,10 @@
+VoiceFX Studio - important setup notes
+
+1. VoiceFX does NOT include or silently install any audio driver.
+2. To use the processed voice in OBS, Discord, Audacity, browsers, etc. you need a virtual audio cable.
+   The free VB-CABLE driver (https://vb-audio.com/Cable/) is the default:
+     - Download, unzip, run VBCABLE_Setup_x64.exe as administrator, then reboot.
+3. In VoiceFX: Mic = your real microphone, Output = "CABLE Input" (selected automatically once installed;
+   you can pick any other output device from the Output list).
+4. In OBS/Discord/etc. choose "CABLE Output (VB-Audio Virtual Cable)" as the microphone.
+5. Use headphones if you enable "Hear my processed voice" (monitoring) to avoid feedback.

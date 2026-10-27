@@ -1,0 +1,173 @@
+<Window x:Class="VoiceFX.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="VoiceFX Studio" Width="440" Height="640" MinWidth="300" MinHeight="260"
+        Background="{StaticResource Bg}" Foreground="{StaticResource Fg}"
+        FontFamily="Segoe UI" UseLayoutRounding="True" SnapsToDevicePixels="True"
+        ShowActivated="False">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*" MinHeight="120"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header: engine status + window tools -->
+        <Grid Grid.Row="0" Margin="0,0,0,8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Ellipse x:Name="StatusDot" Width="11" Height="11" Fill="Gray" Margin="0,0,8,0"/>
+                <TextBlock x:Name="StatusText" Text="Starting…" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" MaxWidth="230"/>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <ToggleButton x:Name="BtnPin" Style="{StaticResource ToolToggle}" Tag="#1F6FEB" Content="📌" ToolTip="Always on top" Margin="0,0,4,0" Click="OnPin"/>
+                <ToggleButton x:Name="BtnCompact" Style="{StaticResource ToolToggle}" Tag="#1F6FEB" Content="▭" ToolTip="Compact mode" Margin="0,0,4,0" Click="OnCompact"/>
+                <ToggleButton x:Name="BtnSettings" Style="{StaticResource ToolToggle}" Tag="#1F6FEB" Content="⚙" ToolTip="Settings" Click="OnSettings"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- Six presets -->
+        <UniformGrid x:Name="PresetGrid" Grid.Row="1" Rows="3" Columns="2" SizeChanged="OnLayoutChanged"/>
+
+        <!-- Meters -->
+        <Grid x:Name="MetersPanel" Grid.Row="2" Margin="0,10,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="34"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <TextBlock Text="IN" Foreground="{StaticResource FgDim}" FontSize="11" VerticalAlignment="Center"/>
+            <Grid Grid.Column="1" Height="10" Margin="0,2">
+                <Border CornerRadius="3" ClipToBounds="True">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                            <GradientStop Color="#2EA043" Offset="0"/><GradientStop Color="#2EA043" Offset="0.65"/>
+                            <GradientStop Color="#D29922" Offset="0.85"/><GradientStop Color="#F85149" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <Rectangle x:Name="InCover" Fill="#0E1013" HorizontalAlignment="Right" Width="0"/>
+                </Border>
+            </Grid>
+            <TextBlock Grid.Row="1" Text="OUT" Foreground="{StaticResource FgDim}" FontSize="11" VerticalAlignment="Center"/>
+            <Grid Grid.Row="1" Grid.Column="1" Height="10" Margin="0,2">
+                <Border CornerRadius="3" ClipToBounds="True">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                            <GradientStop Color="#2EA043" Offset="0"/><GradientStop Color="#2EA043" Offset="0.65"/>
+                            <GradientStop Color="#D29922" Offset="0.85"/><GradientStop Color="#F85149" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <Rectangle x:Name="OutCover" Fill="#0E1013" HorizontalAlignment="Right" Width="0"/>
+                </Border>
+            </Grid>
+            <Border x:Name="ClipLamp" Grid.Column="2" Grid.RowSpan="2" Width="46" Margin="8,2,0,2" CornerRadius="4" Background="#2A1517"
+                    ToolTip="Clip indicator: lights when the input or output hits full scale">
+                <TextBlock Text="CLIP" FontSize="10" FontWeight="Bold" Foreground="#6E3B3E" HorizontalAlignment="Center" VerticalAlignment="Center" x:Name="ClipText"/>
+            </Border>
+        </Grid>
+
+        <!-- Always-visible: mute / bypass / intensity -->
+        <Grid Grid.Row="3" Margin="0,10,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <ToggleButton x:Name="BtnMute" Style="{StaticResource ToolToggle}" Tag="#B62324" Content="🔇 MUTE" Click="OnMute" Margin="0,0,6,0"/>
+            <ToggleButton x:Name="BtnBypass" Style="{StaticResource ToolToggle}" Tag="#9E6A03" Content="BYPASS" ToolTip="Pass the original microphone through unchanged" Click="OnBypass" Margin="0,0,10,0" Grid.Column="1"/>
+            <Grid x:Name="IntensityPanel" Grid.Column="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="38"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="Intensity" Foreground="{StaticResource FgDim}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                <Slider x:Name="SldIntensity" Grid.Column="1" Minimum="0" Maximum="100" Value="100" ValueChanged="OnIntensity" VerticalAlignment="Center"/>
+                <TextBlock x:Name="TxtIntensity" Grid.Column="2" Text="100%" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+            </Grid>
+        </Grid>
+
+        <!-- Devices + virtual-mic banner -->
+        <StackPanel x:Name="DevicePanel" Grid.Row="4" Margin="0,10,0,0">
+            <Grid>
+                <Grid.ColumnDefinitions><ColumnDefinition Width="58"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                <TextBlock Text="Mic" Foreground="{StaticResource FgDim}" VerticalAlignment="Center"/>
+                <ComboBox x:Name="CmbInput" Grid.Column="1" SelectionChanged="OnDeviceChanged" Margin="0,0,0,6" Focusable="False"/>
+                <TextBlock Grid.Row="1" Text="Output" Foreground="{StaticResource FgDim}" VerticalAlignment="Center"/>
+                <ComboBox x:Name="CmbOutput" Grid.Row="1" Grid.Column="1" SelectionChanged="OnDeviceChanged" Focusable="False"
+                          ToolTip="Pick the virtual cable input here (e.g. CABLE Input)"/>
+            </Grid>
+            <Border x:Name="Banner" CornerRadius="6" Padding="8,6" Margin="0,8,0,0" Background="#2A2313">
+                <TextBlock x:Name="BannerText" TextWrapping="Wrap" FontSize="12"/>
+            </Border>
+        </StackPanel>
+
+        <!-- Settings panel -->
+        <ScrollViewer x:Name="SettingsScroll" Grid.Row="5" Visibility="Collapsed" VerticalScrollBarVisibility="Auto" Margin="0,10,0,0" MaxHeight="300" Focusable="False">
+            <Border Background="{StaticResource Panel}" CornerRadius="8" Padding="12" BorderBrush="{StaticResource Line}" BorderThickness="1">
+                <StackPanel>
+                    <TextBlock Text="AUDIO" FontWeight="Bold" Foreground="{StaticResource FgDim}" FontSize="11"/>
+                    <Grid Margin="0,6,0,0">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="110"/><ColumnDefinition Width="*"/><ColumnDefinition Width="56"/></Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions><RowDefinition/><RowDefinition/><RowDefinition/></Grid.RowDefinitions>
+                        <TextBlock Text="Input gain" VerticalAlignment="Center"/>
+                        <Slider x:Name="SldInGain" Grid.Column="1" Minimum="-20" Maximum="20" Value="0" ValueChanged="OnGain"/>
+                        <TextBlock x:Name="TxtInGain" Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="1" Text="Master gain" VerticalAlignment="Center"/>
+                        <Slider x:Name="SldMaster" Grid.Row="1" Grid.Column="1" Minimum="-20" Maximum="6" Value="0" ValueChanged="OnGain"/>
+                        <TextBlock x:Name="TxtMaster" Grid.Row="1" Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="2" Text="Gate threshold" VerticalAlignment="Center"/>
+                        <Slider x:Name="SldGate" Grid.Row="2" Grid.Column="1" Minimum="-70" Maximum="-20" Value="-50" ValueChanged="OnGain"/>
+                        <TextBlock x:Name="TxtGate" Grid.Row="2" Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                    </Grid>
+                    <CheckBox x:Name="ChkGate" Content="Noise gate" Click="OnToggles"/>
+                    <CheckBox x:Name="ChkNr" Content="Basic noise suppression (soft expander)" Click="OnToggles"/>
+                    <Grid Margin="0,4,0,0">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="110"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                        <TextBlock Text="Buffer (ms)" VerticalAlignment="Center"/>
+                        <ComboBox x:Name="CmbBuffer" Grid.Column="1" Width="90" HorizontalAlignment="Left" SelectionChanged="OnBuffer" Focusable="False"/>
+                    </Grid>
+
+                    <TextBlock Text="MONITORING (OFF BY DEFAULT)" FontWeight="Bold" Foreground="{StaticResource FgDim}" FontSize="11" Margin="0,12,0,0"/>
+                    <CheckBox x:Name="ChkMonitor" Content="Hear my processed voice (use headphones!)" Click="OnMonitor"/>
+                    <ComboBox x:Name="CmbMonitor" Margin="0,4,0,0" SelectionChanged="OnMonitorDevice" Focusable="False"/>
+                    <TextBlock x:Name="TxtMonitorErr" Foreground="#F85149" TextWrapping="Wrap" FontSize="12"/>
+
+                    <TextBlock x:Name="PresetParamsTitle" Text="PRESET PARAMETERS" FontWeight="Bold" Foreground="{StaticResource FgDim}" FontSize="11" Margin="0,12,0,0"/>
+                    <StackPanel x:Name="ParamsPanel" Margin="0,6,0,0"/>
+                    <Button Content="Reset this preset" Style="{StaticResource ToolButton}" HorizontalAlignment="Left" Margin="0,6,0,0" Click="OnResetPreset"/>
+
+                    <TextBlock Text="VIRTUAL MICROPHONE" FontWeight="Bold" Foreground="{StaticResource FgDim}" FontSize="11" Margin="0,14,0,0"/>
+                    <TextBlock TextWrapping="Wrap" FontSize="12" Margin="0,4,0,0" Foreground="{StaticResource FgDim}"
+                               Text="VoiceFX sends processed audio to a virtual audio cable. Install the free VB-CABLE driver once, set Output to 'CABLE Input', then choose 'CABLE Output' as the microphone in OBS, Discord, Audacity, your browser, etc."/>
+                    <WrapPanel Margin="0,6,0,0">
+                        <Button Content="VB-CABLE download page" Style="{StaticResource ToolButton}" Click="OnOpenCable" Margin="0,0,6,4"/>
+                        <Button Content="Windows sound settings" Style="{StaticResource ToolButton}" Click="OnOpenSound" Margin="0,0,6,4"/>
+                    </WrapPanel>
+                    <TextBlock x:Name="TxtLatency" FontSize="12" Foreground="{StaticResource FgDim}" Margin="0,4,0,0"/>
+
+                    <TextBlock Text="APPLICATION" FontWeight="Bold" Foreground="{StaticResource FgDim}" FontSize="11" Margin="0,14,0,0"/>
+                    <CheckBox x:Name="ChkTray" Content="Show system-tray icon" Click="OnAppToggles"/>
+                    <CheckBox x:Name="ChkMinTray" Content="Minimize to tray" Click="OnAppToggles"/>
+                    <CheckBox x:Name="ChkCloseTray" Content="Close button hides to tray (instead of exiting)" Click="OnAppToggles"/>
+                    <CheckBox x:Name="ChkStartup" Content="Launch at Windows startup" Click="OnAppToggles"/>
+                    <CheckBox x:Name="ChkStartMin" Content="Start minimized (to tray)" Click="OnAppToggles"/>
+                    <WrapPanel Margin="0,8,0,0">
+                        <Button Content="Restart audio engine" Style="{StaticResource ToolButton}" Click="OnRestartEngine" Margin="0,0,6,4"/>
+                        <Button Content="Open log folder" Style="{StaticResource ToolButton}" Click="OnOpenLogs" Margin="0,0,6,4"/>
+                        <Button Content="Reset to defaults" Style="{StaticResource ToolButton}" Click="OnResetAll" Margin="0,0,6,4"/>
+                    </WrapPanel>
+                </StackPanel>
+            </Border>
+        </ScrollViewer>
+    </Grid>
+</Window>
